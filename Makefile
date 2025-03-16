@@ -3,7 +3,7 @@ CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -Wpedantic -Wshadow# -ggdb3 -fsanitize=address,undefined -fstack-protector-strong
 LDLIBS=
 
-SRC=main.c bytearray.c fat12.c
+SRC=main.c bytearray.c fat12.c print.c
 OBJ=$(addprefix obj/, $(addsuffix .o, $(SRC)))
 
 BIN=dump-fat.out

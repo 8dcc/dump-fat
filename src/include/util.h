@@ -13,6 +13,11 @@
 #define STRLEN(STR) (sizeof(STR) - sizeof(char))
 
 /*
+ * Return the number of elements in an array.
+ */
+#define ARRLEN(ARR) (sizeof(ARR) / sizeof((ARR)[0]))
+
+/*
  * Print a formatted string to 'stderr' along with a newline.
  */
 #define ERR(...)                                                               \

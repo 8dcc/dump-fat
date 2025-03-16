@@ -8,6 +8,7 @@
 
 #include "include/bytearray.h"
 #include "include/fat12.h"
+#include "include/print.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -29,6 +30,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    puts("Extended Bios Parameter Block (EBPB):");
+    print_ebpb(stdout, &boot_sector->ebpb);
+    putchar('\n');
+
     ByteArray fat;
     if (!read_fat(&fat, diskimg_fp, boot_sector)) {
         ERR("Could not read FAT of '%s'.", diskimg_path);
@@ -37,6 +42,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    puts("File Allocation Table (FAT):");
     bytearray_print(stdout, &fat);
 
     free(fat.data);
