@@ -14,3 +14,20 @@ cd dump-fat
 make
 # ...
 #+end_src
+
+* Creating an example FAT12 image
+
+You can create an example FAT12 image file for testing with the following
+commands.
+
+#+begin_src bash
+dd if=/dev/zero of=my-fat.img bs=512 count=100
+mkfs.fat -F 12 my-fat.img
+mkdir -p my-mount-dir
+sudo mount -o loop my-fat.img my-mount-dir/
+sudo mkdir my-mount-dir/dir1
+echo "Hello from A" | sudo tee my-mount-dir/a.txt
+echo "Hello from B" | sudo tee my-mount-dir/dir1/b.txt
+sudo umount my-mount-dir/
+rmdir my-mount-dir/
+#+end_src
