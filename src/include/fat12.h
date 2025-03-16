@@ -93,7 +93,7 @@ BootSector* read_boot_sector(FILE* disk);
  */
 bool read_sectors(ByteArray* dst,
                   FILE* disk,
-                  BootSector* boot_sector,
+                  const BootSector* boot_sector,
                   uint16_t lba,
                   uint8_t count);
 
@@ -103,6 +103,6 @@ bool read_sectors(ByteArray* dst,
  * The 'data' pointer of the received 'ByteArray' structure will be set to a
  * heap-allocated pointer that the caller must free.
  */
-bool read_fat(ByteArray* dst, FILE* disk, BootSector* boot_sector);
+bool read_fat(ByteArray* dst, FILE* disk, const BootSector* boot_sector);
 
 #endif /* FAT12_H_ */

@@ -23,7 +23,7 @@ BootSector* read_boot_sector(FILE* disk) {
 
 bool read_sectors(ByteArray* dst,
                   FILE* disk,
-                  BootSector* boot_sector,
+                  const BootSector* boot_sector,
                   uint16_t lba,
                   uint8_t count) {
     if (fseek(disk, lba * boot_sector->ebpb.bytes_per_sector, SEEK_SET) != 0)
@@ -45,7 +45,7 @@ bool read_sectors(ByteArray* dst,
     return true;
 }
 
-bool read_fat(ByteArray* dst, FILE* disk, BootSector* boot_sector) {
+bool read_fat(ByteArray* dst, FILE* disk, const BootSector* boot_sector) {
     /* The FAT region starts right after the reserved sectors */
     return read_sectors(dst,
                         disk,
