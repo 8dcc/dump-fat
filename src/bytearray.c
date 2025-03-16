@@ -31,7 +31,7 @@ void bytearray_print_at(FILE* fp,
         fprintf(fp, "%02X", ((uint8_t*)arr->data)[i]);
 
         const size_t bytes_printed = (i + 1);
-        if (bytes_printed % word_size == 0) {
+        if (i + 1 < arr->size && bytes_printed % word_size == 0) {
             /* Just ended a word */
             const size_t words_printed = bytes_printed / word_size;
             if (words_per_line != 0 && words_printed % words_per_line == 0)
@@ -41,5 +41,5 @@ void bytearray_print_at(FILE* fp,
         }
     }
 
-    /* TODO: Print final newline when needed. */
+    fputc('\n', fp);
 }
