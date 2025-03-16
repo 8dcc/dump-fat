@@ -1,3 +1,6 @@
+# Image files
+*.img
+
 # Prerequisites
 *.d
 
