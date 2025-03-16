@@ -1,15 +1,13 @@
 
 CC=gcc
-CFLAGS=-std=c99 -Wall -Wextra -Wpedantic -ggdb3
+CFLAGS=-std=c99 -Wall -Wextra -Wpedantic -Wshadow# -ggdb3 -fsanitize=address,undefined -fstack-protector-strong
 LDLIBS=
 
-# TODO: Add object files and rename
-SRC=main.c
+SRC=main.c bytearray.c fat12.c
 OBJ=$(addprefix obj/, $(addsuffix .o, $(SRC)))
 
-BIN=output.out
+BIN=dump-fat.out
 
-# TODO: Remove install target when not necessary
 PREFIX=/usr/local
 BINDIR=$(PREFIX)/bin
 
