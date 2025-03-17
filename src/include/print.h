@@ -12,4 +12,10 @@
  */
 void print_ebpb(FILE* fp, const ExtendedBiosParameterBlock* ebpb);
 
+/*
+ * Print an array of directory entries of the specified size to the specified
+ * file.
+ */
+void print_directory_entries(FILE* fp, const DirectoryEntry* arr, size_t size);
+
 #endif /* PRINT_H_ */

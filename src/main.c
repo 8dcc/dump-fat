@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
 
     puts("Extended Bios Parameter Block (EBPB):");
     print_ebpb(stdout, &boot_sector->ebpb);
-    putchar('\n');
 
     ByteArray fat;
     if (!read_fat(&fat, diskimg_fp, boot_sector)) {
@@ -42,9 +41,27 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    putchar('\n');
     puts("File Allocation Table (FAT):");
     bytearray_print(stdout, &fat);
 
+    DirectoryEntry* root_directory =
+      read_root_directory(diskimg_fp, boot_sector);
+    if (root_directory == NULL) {
+        ERR("Could not read root directory of '%s'.", diskimg_path);
+        free(fat.data);
+        free(boot_sector);
+        fclose(diskimg_fp);
+        return 1;
+    }
+
+    putchar('\n');
+    puts("Root directory:");
+    print_directory_entries(stdout,
+                            root_directory,
+                            boot_sector->ebpb.dir_entries_count);
+
+    free(root_directory);
     free(fat.data);
     free(boot_sector);
     fclose(diskimg_fp);

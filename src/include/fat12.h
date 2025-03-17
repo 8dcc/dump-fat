@@ -74,8 +74,15 @@ typedef struct {
     uint16_t first_cluster_low;
     uint32_t size;
 } __attribute__((packed)) DirectoryEntry;
+STATIC_ASSERT(sizeof(DirectoryEntry) == 32);
 
 /*----------------------------------------------------------------------------*/
+
+/*
+ * TODO: Add more consistent naming convention (e.g. 'fat12_*').
+ * TODO: Rename 'ExtendedBiosParameterBlock' to 'ExtendedBPB'.
+ * TODO: Replace most of these 'BootSector' arguments with 'ExtendedBPB'.
+ */
 
 /*
  * Return a heap-allocated copy of the boot sector in the specified file. The
@@ -104,5 +111,14 @@ bool read_sectors(ByteArray* dst,
  * heap-allocated pointer that the caller must free.
  */
 bool read_fat(ByteArray* dst, FILE* disk, const BootSector* boot_sector);
+
+/*
+ * Return an array of directory entries for the root directory of the specified
+ * disk. The size of the returned array can be obtained by looking at the
+ * 'dir_entries_count' member of the 'ExtendedBiosParameterBlock' structure.
+ *
+ * The caller is responsible for freeing the returned pointer.
+ */
+DirectoryEntry* read_root_directory(FILE* disk, const BootSector* boot_sector);
 
 #endif /* FAT12_H_ */

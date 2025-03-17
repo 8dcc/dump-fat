@@ -45,3 +45,30 @@ void print_ebpb(FILE* fp, const ExtendedBiosParameterBlock* ebpb) {
     PRINT_MEMBER(fp, ebpb, 21, ".11s", volume_label);
     PRINT_MEMBER(fp, ebpb, 21, ".8s", system_id);
 }
+
+void print_directory_entries(FILE* fp, const DirectoryEntry* arr, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        fprintf(fp, "----------(Entry %03zu)----------\n", i);
+        const DirectoryEntry* cur = &arr[i];
+
+        if (is_mem_zero(cur, sizeof(DirectoryEntry))) {
+            fprintf(fp, "<null>\n");
+            continue;
+        }
+
+        PRINT_MEMBER(fp, cur, 18, ".11s", name);
+        PRINT_MEMBER(fp, cur, 18, PRId8, attributes);
+        PRINT_MEMBER(fp, cur, 18, PRId8, reserved);
+        PRINT_MEMBER(fp, cur, 18, PRId8, created_time_tenths);
+        PRINT_MEMBER(fp, cur, 18, PRId16, created_time);
+        PRINT_MEMBER(fp, cur, 18, PRId16, created_date);
+        PRINT_MEMBER(fp, cur, 18, PRId16, accessed_date);
+        PRINT_MEMBER(fp, cur, 18, PRId16, first_cluster_high);
+        PRINT_MEMBER(fp, cur, 18, PRId16, modified_time);
+        PRINT_MEMBER(fp, cur, 18, PRId16, modified_date);
+        PRINT_MEMBER(fp, cur, 18, PRId16, first_cluster_low);
+        PRINT_MEMBER(fp, cur, 18, PRId32, size);
+    }
+
+    fprintf(fp, "-------------------------------\n");
+}
