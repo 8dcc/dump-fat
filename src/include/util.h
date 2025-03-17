@@ -2,6 +2,10 @@
 #ifndef UTIL_H_
 #define UTIL_H_ 1
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+
 /*
  * Assert condition at compile-time.
  */
@@ -25,5 +29,12 @@
         fprintf(stderr, __VA_ARGS__);                                          \
         fputc('\n', stderr);                                                   \
     } while (0)
+
+/*----------------------------------------------------------------------------*/
+
+/*
+ * Return true if the bytes in the specified memory region are all zero.
+ */
+bool is_mem_zero(const void* ptr, size_t size);
 
 #endif /* UTIL_H_ */
