@@ -22,7 +22,7 @@
         fputc('\n', FP);                                                       \
     } while (0)
 
-void print_ebpb(FILE* fp, const ExtendedBiosParameterBlock* ebpb) {
+void print_ebpb(FILE* fp, const ExtendedBPB* ebpb) {
     PRINT_MEMBER(fp, ebpb, 21, PRId16, bytes_per_sector);
     PRINT_MEMBER(fp, ebpb, 21, PRId8, sectors_per_cluster);
     PRINT_MEMBER(fp, ebpb, 21, PRId16, reserved_sectors);

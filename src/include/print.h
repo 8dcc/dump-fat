@@ -10,7 +10,7 @@
  * Print the data in the specified Extended Bios Parameter Block (EBPB) to the
  * specified file.
  */
-void print_ebpb(FILE* fp, const ExtendedBiosParameterBlock* ebpb);
+void print_ebpb(FILE* fp, const ExtendedBPB* ebpb);
 
 /*
  * Print an array of directory entries of the specified size to the specified

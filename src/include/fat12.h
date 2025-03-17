@@ -36,8 +36,8 @@ typedef struct {
     uint8_t volume_id[4];
     uint8_t volume_label[11];
     uint8_t system_id[8];
-} __attribute__((packed)) ExtendedBiosParameterBlock;
-STATIC_ASSERT(sizeof(ExtendedBiosParameterBlock) == 51);
+} __attribute__((packed)) ExtendedBPB;
+STATIC_ASSERT(sizeof(ExtendedBPB) == 51);
 
 /*
  * First boot sector of a FAT12 disk.
@@ -46,7 +46,7 @@ typedef struct {
     uint16_t short_jmp;
     uint8_t nop;
     uint8_t oem_identifier[8];
-    ExtendedBiosParameterBlock ebpb;
+    ExtendedBPB ebpb;
 
     /*
      * After the EBPB, there is code until offset 510 included, followed by byte
@@ -55,7 +55,10 @@ typedef struct {
 } __attribute__((packed)) BootSector;
 
 /*
- * TODO
+ * Individual entry in a FAT12 directory.
+ *
+ * The filename limit was 11 characters, with spaces separating the name itself
+ * from the extension (e.g.  "FOOBAR TXT").
  *
  * See:
  * https://en.wikipedia.org/wiki/Design_of_the_FAT_file_system#Directory_entry
@@ -80,8 +83,6 @@ STATIC_ASSERT(sizeof(DirectoryEntry) == 32);
 
 /*
  * TODO: Add more consistent naming convention (e.g. 'fat12_*').
- * TODO: Rename 'ExtendedBiosParameterBlock' to 'ExtendedBPB'.
- * TODO: Replace most of these 'BootSector' arguments with 'ExtendedBPB'.
  */
 
 /*
@@ -115,7 +116,7 @@ bool read_fat(ByteArray* dst, FILE* disk, const BootSector* boot_sector);
 /*
  * Return an array of directory entries for the root directory of the specified
  * disk. The size of the returned array can be obtained by looking at the
- * 'dir_entries_count' member of the 'ExtendedBiosParameterBlock' structure.
+ * 'dir_entries_count' member of the 'ExtendedBPB' structure.
  *
  * The caller is responsible for freeing the returned pointer.
  */
