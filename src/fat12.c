@@ -23,19 +23,18 @@ BootSector* read_boot_sector(FILE* disk) {
 
 bool read_sectors(ByteArray* dst,
                   FILE* disk,
-                  const BootSector* boot_sector,
+                  const ExtendedBPB* ebpb,
                   uint16_t lba,
                   uint8_t count) {
-    if (fseek(disk, lba * boot_sector->ebpb.bytes_per_sector, SEEK_SET) != 0)
+    if (fseek(disk, lba * ebpb->bytes_per_sector, SEEK_SET) != 0)
         return false;
 
-    size_t result_sz = boot_sector->ebpb.bytes_per_sector * count;
+    size_t result_sz = ebpb->bytes_per_sector * count;
     void* result     = malloc(result_sz);
     if (result == NULL)
         return false;
 
-    if (fread(result, boot_sector->ebpb.bytes_per_sector, count, disk) !=
-        count) {
+    if (fread(result, ebpb->bytes_per_sector, count, disk) != count) {
         free(result);
         return false;
     }
@@ -45,38 +44,35 @@ bool read_sectors(ByteArray* dst,
     return true;
 }
 
-bool read_fat(ByteArray* dst, FILE* disk, const BootSector* boot_sector) {
+bool read_fat(ByteArray* dst, FILE* disk, const ExtendedBPB* ebpb) {
     /* The FAT region starts right after the reserved sectors */
     return read_sectors(dst,
                         disk,
-                        boot_sector,
-                        boot_sector->ebpb.reserved_sectors,
-                        boot_sector->ebpb.sectors_per_fat);
+                        ebpb,
+                        ebpb->reserved_sectors,
+                        ebpb->sectors_per_fat);
 }
 
-DirectoryEntry* read_root_directory(FILE* disk, const BootSector* boot_sector) {
+DirectoryEntry* read_root_directory(FILE* disk, const ExtendedBPB* ebpb) {
     /*
      * The root directory region starts after the reserved sectors and after the
      * FAT(s).
      */
     const size_t lba_start =
-      boot_sector->ebpb.reserved_sectors +
-      boot_sector->ebpb.sectors_per_fat * boot_sector->ebpb.fat_count;
-
-    const size_t size_bytes =
-      boot_sector->ebpb.dir_entries_count * sizeof(DirectoryEntry);
+      ebpb->reserved_sectors + ebpb->sectors_per_fat * ebpb->fat_count;
 
     /*
-     * Size of the root directory in sectors. We add (BytesPerSector-1) to the
-     * size in bytes to round up the sector count, in case the root directory
-     * only uses a fraction of its last sector (i.e. the division wasn't exact).
+     * Size of the root directory in bytes and sectors. We add
+     * (BytesPerSector-1) to the size in bytes to round up the sector count, in
+     * case the root directory only uses a fraction of its last sector (i.e. the
+     * division wasn't exact).
      */
+    const size_t size_bytes = ebpb->dir_entries_count * sizeof(DirectoryEntry);
     const size_t size_sectors =
-      (size_bytes + boot_sector->ebpb.bytes_per_sector - 1) /
-      boot_sector->ebpb.bytes_per_sector;
+      (size_bytes + ebpb->bytes_per_sector - 1) / ebpb->bytes_per_sector;
 
     ByteArray result;
-    if (!read_sectors(&result, disk, boot_sector, lba_start, size_sectors))
+    if (!read_sectors(&result, disk, ebpb, lba_start, size_sectors))
         return NULL;
 
     return result.data;

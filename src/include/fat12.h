@@ -101,7 +101,7 @@ BootSector* read_boot_sector(FILE* disk);
  */
 bool read_sectors(ByteArray* dst,
                   FILE* disk,
-                  const BootSector* boot_sector,
+                  const ExtendedBPB* ebpb,
                   uint16_t lba,
                   uint8_t count);
 
@@ -111,7 +111,7 @@ bool read_sectors(ByteArray* dst,
  * The 'data' pointer of the received 'ByteArray' structure will be set to a
  * heap-allocated pointer that the caller must free.
  */
-bool read_fat(ByteArray* dst, FILE* disk, const BootSector* boot_sector);
+bool read_fat(ByteArray* dst, FILE* disk, const ExtendedBPB* ebpb);
 
 /*
  * Return an array of directory entries for the root directory of the specified
@@ -120,6 +120,6 @@ bool read_fat(ByteArray* dst, FILE* disk, const BootSector* boot_sector);
  *
  * The caller is responsible for freeing the returned pointer.
  */
-DirectoryEntry* read_root_directory(FILE* disk, const BootSector* boot_sector);
+DirectoryEntry* read_root_directory(FILE* disk, const ExtendedBPB* ebpb);
 
 #endif /* FAT12_H_ */

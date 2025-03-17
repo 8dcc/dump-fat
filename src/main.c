@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     print_ebpb(stdout, &boot_sector->ebpb);
 
     ByteArray fat;
-    if (!read_fat(&fat, diskimg_fp, boot_sector)) {
+    if (!read_fat(&fat, diskimg_fp, &boot_sector->ebpb)) {
         ERR("Could not read FAT of '%s'.", diskimg_path);
         free(boot_sector);
         fclose(diskimg_fp);
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     bytearray_print(stdout, &fat);
 
     DirectoryEntry* root_directory =
-      read_root_directory(diskimg_fp, boot_sector);
+      read_root_directory(diskimg_fp, &boot_sector->ebpb);
     if (root_directory == NULL) {
         ERR("Could not read root directory of '%s'.", diskimg_path);
         free(fat.data);
