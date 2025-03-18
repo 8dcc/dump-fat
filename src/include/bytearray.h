@@ -46,7 +46,7 @@ typedef struct {
  * zero to disable line wrapping.
  */
 void bytearray_print_at(FILE* fp,
-                        const ByteArray* arr,
+                        ByteArray arr,
                         size_t visual_offset,
                         size_t word_size,
                         size_t words_per_line);
@@ -54,7 +54,7 @@ void bytearray_print_at(FILE* fp,
 /*
  * Simple wrapper for 'bytearray_print_at'.
  */
-static inline void bytearray_print(FILE* fp, ByteArray* arr) {
+static inline void bytearray_print(FILE* fp, ByteArray arr) {
     const size_t default_word_size      = 2;
     const size_t default_words_per_line = 0x10 / default_word_size;
     bytearray_print_at(fp, arr, 0, default_word_size, default_words_per_line);

@@ -24,7 +24,7 @@
 #include "include/util.h"
 
 void bytearray_print_at(FILE* fp,
-                        const ByteArray* arr,
+                        ByteArray arr,
                         size_t visual_offset,
                         size_t word_size,
                         size_t words_per_line) {
@@ -35,12 +35,12 @@ void bytearray_print_at(FILE* fp,
     /* First offset */
     fprintf(fp, "%04zX: ", visual_offset);
 
-    for (size_t i = 0; i < arr->size; i++) {
+    for (size_t i = 0; i < arr.size; i++) {
         /* Current byte */
-        fprintf(fp, "%02X", ((uint8_t*)arr->data)[i]);
+        fprintf(fp, "%02X", ((uint8_t*)arr.data)[i]);
 
         const size_t bytes_printed = (i + 1);
-        if (i + 1 < arr->size && bytes_printed % word_size == 0) {
+        if (i + 1 < arr.size && bytes_printed % word_size == 0) {
             /* Just ended a word */
             const size_t words_printed = bytes_printed / word_size;
             if (words_per_line != 0 && words_printed % words_per_line == 0)

@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
     putchar('\n');
     puts("File Allocation Table (FAT):");
-    bytearray_print(stdout, &fat);
+    bytearray_print(stdout, fat);
 
     DirectoryEntry* root_directory =
       read_root_directory(diskimg_fp, &boot_sector->ebpb);
