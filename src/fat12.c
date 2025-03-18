@@ -28,6 +28,31 @@
 /*----------------------------------------------------------------------------*/
 /* General disk reading */
 
+static bool append_sectors(ByteArray* dst,
+                           FILE* disk,
+                           const ExtendedBPB* ebpb,
+                           uint16_t lba,
+                           uint8_t count) {
+    if (fseek(disk, lba * ebpb->bytes_per_sector, SEEK_SET) != 0)
+        return false;
+
+    size_t new_size = dst->size + (count * ebpb->bytes_per_sector);
+    void* new_data  = realloc(dst->data, new_size);
+    if (new_data == NULL)
+        return false;
+
+    void* free_data = (char*)new_data + dst->size;
+    if (fread(free_data, ebpb->bytes_per_sector, count, disk) != count) {
+        if (dst->data == NULL)
+            free(new_data);
+        return false;
+    }
+
+    dst->data = new_data;
+    dst->size = new_size;
+    return true;
+}
+
 BootSector* read_boot_sector(FILE* disk) {
     BootSector* result = malloc(sizeof(BootSector));
     if (result == NULL)
@@ -46,22 +71,9 @@ bool read_sectors(ByteArray* dst,
                   const ExtendedBPB* ebpb,
                   uint16_t lba,
                   uint8_t count) {
-    if (fseek(disk, lba * ebpb->bytes_per_sector, SEEK_SET) != 0)
-        return false;
-
-    size_t result_sz = ebpb->bytes_per_sector * count;
-    void* result     = malloc(result_sz);
-    if (result == NULL)
-        return false;
-
-    if (fread(result, ebpb->bytes_per_sector, count, disk) != count) {
-        free(result);
-        return false;
-    }
-
-    dst->data = result;
-    dst->size = result_sz;
-    return true;
+    dst->data = NULL;
+    dst->size = 0;
+    return append_sectors(dst, disk, ebpb, lba, count);
 }
 
 /*----------------------------------------------------------------------------*/
