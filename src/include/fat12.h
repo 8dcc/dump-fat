@@ -139,4 +139,20 @@ bool read_fat(ByteArray* dst, FILE* disk, const ExtendedBPB* ebpb);
  */
 DirectoryEntry* read_root_directory(FILE* disk, const ExtendedBPB* ebpb);
 
+/*
+ * Search for a directory entry with the specified name, in the specified array.
+ */
+DirectoryEntry* search_entry(DirectoryEntry* arr,
+                             size_t size,
+                             const char* name);
+
+/*
+ * Read the contents of the specified file into the destination byte array.
+ */
+bool read_file(ByteArray* dst,
+               FILE* disk,
+               const ExtendedBPB* ebpb,
+               ByteArray fat,
+               const DirectoryEntry* file);
+
 #endif /* FAT12_H_ */

@@ -78,6 +78,25 @@ int main(int argc, char** argv) {
                             root_directory,
                             boot_sector->ebpb.dir_entries_count);
 
+    DirectoryEntry* file = search_entry(root_directory,
+                                        boot_sector->ebpb.dir_entries_count,
+                                        "A       TXT");
+    if (file != NULL) {
+        ByteArray file_contents;
+        if (read_file(&file_contents,
+                      diskimg_fp,
+                      &boot_sector->ebpb,
+                      fat,
+                      file)) {
+            putchar('\n');
+            puts("Contents of 'a.txt':");
+            bytearray_print(stdout, file_contents);
+            free(file_contents.data);
+        } else {
+            ERR("Could not read root directory of '%s'.", diskimg_path);
+        }
+    }
+
     free(root_directory);
     free(fat.data);
     free(boot_sector);
