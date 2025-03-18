@@ -25,6 +25,9 @@
 #include "include/bytearray.h"
 #include "include/fat12.h"
 
+/*----------------------------------------------------------------------------*/
+/* General disk reading */
+
 BootSector* read_boot_sector(FILE* disk) {
     BootSector* result = malloc(sizeof(BootSector));
     if (result == NULL)
@@ -61,6 +64,9 @@ bool read_sectors(ByteArray* dst,
     return true;
 }
 
+/*----------------------------------------------------------------------------*/
+/* File Allocation Table (FAT) */
+
 bool read_fat(ByteArray* dst, FILE* disk, const ExtendedBPB* ebpb) {
     /* The FAT region starts right after the reserved sectors */
     return read_sectors(dst,
@@ -70,23 +76,41 @@ bool read_fat(ByteArray* dst, FILE* disk, const ExtendedBPB* ebpb) {
                         ebpb->sectors_per_fat);
 }
 
-DirectoryEntry* read_root_directory(FILE* disk, const ExtendedBPB* ebpb) {
-    /*
-     * The root directory region starts after the reserved sectors and after the
-     * FAT(s).
-     */
-    const size_t lba_start =
-      ebpb->reserved_sectors + ebpb->sectors_per_fat * ebpb->fat_count;
+/*----------------------------------------------------------------------------*/
+/* Root directory */
 
+/*
+ * Return the LBA address where the root directory starts.
+ *
+ * The root directory region starts after the reserved sectors and after the
+ * FAT(s).
+ */
+static inline size_t get_rootdir_start(const ExtendedBPB* ebpb) {
+    return ebpb->reserved_sectors + ebpb->sectors_per_fat * ebpb->fat_count;
+}
+
+/*
+ * Return the size of the root directory in sectors.
+ */
+static inline size_t get_rootdir_size(const ExtendedBPB* ebpb) {
     /*
-     * Size of the root directory in bytes and sectors. We add
-     * (BytesPerSector-1) to the size in bytes to round up the sector count, in
-     * case the root directory only uses a fraction of its last sector (i.e. the
-     * division wasn't exact).
+     * Size of the root directory in bytes.
      */
     const size_t size_bytes = ebpb->dir_entries_count * sizeof(DirectoryEntry);
-    const size_t size_sectors =
-      (size_bytes + ebpb->bytes_per_sector - 1) / ebpb->bytes_per_sector;
+
+    /*
+     * Size of the root directory in sectors. We add (BytesPerSector-1) to the
+     * size in bytes to round up the sector count, in case the root directory
+     * only uses a fraction of its last sector (i.e. the division wasn't exact).
+     *
+     * This is the same operation that is used in p. 13 of the specification.
+     */
+    return (size_bytes + ebpb->bytes_per_sector - 1) / ebpb->bytes_per_sector;
+}
+
+DirectoryEntry* read_root_directory(FILE* disk, const ExtendedBPB* ebpb) {
+    const size_t lba_start    = get_rootdir_start(ebpb);
+    const size_t size_sectors = get_rootdir_size(ebpb);
 
     ByteArray result;
     if (!read_sectors(&result, disk, ebpb, lba_start, size_sectors))
