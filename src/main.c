@@ -28,8 +28,8 @@
 #include "include/print.h"
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        ERR("Usage: %s DISK.img\n", argv[0]);
+    if (argc < 2 || argc > 3) {
+        ERR("Usage: %s DISK.img [FILENAME]\n", argv[0]);
         return 1;
     }
 
@@ -78,10 +78,22 @@ int main(int argc, char** argv) {
                             root_directory,
                             boot_sector->ebpb.dir_entries_count);
 
-    DirectoryEntry* file = search_entry(root_directory,
-                                        boot_sector->ebpb.dir_entries_count,
-                                        "A       TXT");
-    if (file != NULL) {
+    if (argc >= 3) {
+        const char* filename = argv[2];
+        if (strlen(filename) != 11) {
+            ERR("Invalid filename, expected 11 characters, got '%s'.",
+                filename);
+            goto done;
+        }
+
+        DirectoryEntry* file = search_entry(root_directory,
+                                            boot_sector->ebpb.dir_entries_count,
+                                            filename);
+        if (file == NULL) {
+            ERR("File '%s' is not present in the root directory.", filename);
+            goto done;
+        }
+
         ByteArray file_contents;
         if (read_file(&file_contents,
                       diskimg_fp,
@@ -89,7 +101,7 @@ int main(int argc, char** argv) {
                       fat,
                       file)) {
             putchar('\n');
-            puts("Contents of 'a.txt':");
+            printf("Contents of '%s':\n", filename);
             bytearray_print(stdout, file_contents);
             free(file_contents.data);
         } else {
@@ -97,6 +109,7 @@ int main(int argc, char** argv) {
         }
     }
 
+done:
     free(root_directory);
     free(fat.data);
     free(boot_sector);
