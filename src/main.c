@@ -28,6 +28,8 @@
 #include "include/print.h"
 
 int main(int argc, char** argv) {
+    int exit_code = 0;
+
     if (argc < 2 || argc > 3) {
         ERR("Usage: %s DISK.img [FILENAME]\n", argv[0]);
         return 1;
@@ -43,8 +45,8 @@ int main(int argc, char** argv) {
     BootSector* boot_sector = read_boot_sector(diskimg_fp);
     if (boot_sector == NULL) {
         ERR("Could not read boot sector of '%s'.", diskimg_path);
-        fclose(diskimg_fp);
-        return 1;
+        exit_code = 1;
+        goto invalid_boot_sector;
     }
 
     puts("Extended Bios Parameter Block (EBPB):");
@@ -53,9 +55,8 @@ int main(int argc, char** argv) {
     ByteArray fat;
     if (!read_fat(&fat, diskimg_fp, &boot_sector->ebpb)) {
         ERR("Could not read FAT of '%s'.", diskimg_path);
-        free(boot_sector);
-        fclose(diskimg_fp);
-        return 1;
+        exit_code = 1;
+        goto invalid_fat;
     }
 
     putchar('\n');
@@ -66,10 +67,8 @@ int main(int argc, char** argv) {
       read_root_directory(diskimg_fp, &boot_sector->ebpb);
     if (root_directory == NULL) {
         ERR("Could not read root directory of '%s'.", diskimg_path);
-        free(fat.data);
-        free(boot_sector);
-        fclose(diskimg_fp);
-        return 1;
+        exit_code = 1;
+        goto invalid_root_directory;
     }
 
     putchar('\n');
@@ -83,7 +82,8 @@ int main(int argc, char** argv) {
         if (strlen(filename) != 11) {
             ERR("Invalid filename, expected 11 characters, got '%s'.",
                 filename);
-            goto done;
+            exit_code = 1;
+            goto invalid_file;
         }
 
         DirectoryEntry* file = search_entry(root_directory,
@@ -91,7 +91,8 @@ int main(int argc, char** argv) {
                                             filename);
         if (file == NULL) {
             ERR("File '%s' is not present in the root directory.", filename);
-            goto done;
+            exit_code = 1;
+            goto invalid_file;
         }
 
         ByteArray file_contents;
@@ -109,10 +110,14 @@ int main(int argc, char** argv) {
         }
     }
 
-done:
+invalid_file:
     free(root_directory);
+invalid_root_directory:
     free(fat.data);
+invalid_fat:
     free(boot_sector);
+invalid_boot_sector:
     fclose(diskimg_fp);
-    return 0;
+
+    return exit_code;
 }
