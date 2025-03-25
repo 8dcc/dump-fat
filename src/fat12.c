@@ -134,7 +134,7 @@ static inline size_t get_rootdir_size(const ExtendedBPB* ebpb) {
  * will return the LBA address of the next one. This is consistent with the
  * behavior of 'get_rootdir_size', which includes the last (partial) one.
  */
-static inline size_t get_rootdir_end(const ExtendedBPB* ebpb) {
+static inline size_t get_data_region_start(const ExtendedBPB* ebpb) {
     return get_rootdir_start(ebpb) + get_rootdir_size(ebpb);
 }
 
@@ -217,7 +217,7 @@ bool read_file(ByteArray* dst,
     dst->data = NULL;
     dst->size = 0;
 
-    const size_t rootdir_end = get_rootdir_end(ebpb);
+    const size_t data_region_start = get_data_region_start(ebpb);
 
     /*
      * The first cluster where the file is stored. Clusters are simply groups
@@ -241,7 +241,8 @@ bool read_file(ByteArray* dst,
          * specification.
          */
         const uint32_t sector_lba =
-          rootdir_end + ((current_cluster - 2) * ebpb->sectors_per_cluster);
+          data_region_start +
+          ((current_cluster - 2) * ebpb->sectors_per_cluster);
 
         if (!append_sectors(dst,
                             disk,
