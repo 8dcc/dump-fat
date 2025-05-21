@@ -35,6 +35,15 @@
 /*----------------------------------------------------------------------------*/
 /* General disk reading */
 
+/*
+ * Append 'count' sectors at the specified 'lba' address from the specified
+ * 'disk' into the specified 'dst' byte array. The 'dst->data' pointer may be
+ * NULL, and a new buffer will be allocated.
+ *
+ * On success, this function returns true and the caller is responsible for
+ * freeing the new value in 'dst->data'. On failure, this function returns false
+ * and the 'dst' array will remain unchanged, with the old data.
+ */
 static bool append_sectors(ByteArray* dst,
                            FILE* disk,
                            const ExtendedBPB* ebpb,
@@ -43,18 +52,29 @@ static bool append_sectors(ByteArray* dst,
     if (fseek(disk, lba * ebpb->bytes_per_sector, SEEK_SET) != 0)
         return false;
 
+    /* Allocate a new data buffer, without modifying the one on 'dst' */
     size_t new_size = dst->size + (count * ebpb->bytes_per_sector);
-    void* new_data  = realloc(dst->data, new_size);
+    void* new_data  = malloc(new_size);
     if (new_data == NULL)
         return false;
 
+    /* Copy the old data to the new buffer */
+    if (dst->data != NULL)
+        memcpy(new_data, dst->data, dst->size);
+
+    /* Read the new data into the free space of the new data buffer */
     void* free_data = (char*)new_data + dst->size;
     if (fread(free_data, ebpb->bytes_per_sector, count, disk) != count) {
-        if (dst->data == NULL)
-            free(new_data);
+        free(new_data);
         return false;
     }
 
+    /*
+     * Once every operation succeeded, we can modify 'dst'. First, free the old
+     * 'data' pointer, which we are "reallocating". Then, overwrite the data
+     * pointer and size with the updated values.
+     */
+    free(dst->data);
     dst->data = new_data;
     dst->size = new_size;
     return true;
