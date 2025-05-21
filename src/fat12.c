@@ -188,10 +188,10 @@ static inline uint16_t fat12_get_linked_cluster(ByteArray fat,
 
     const uint8_t byte0 = ((uint8_t*)fat.data)[fat_idx];
     const uint8_t byte1 = ((uint8_t*)fat.data)[fat_idx + 1];
-    if (fat_idx & 1) {
+    if (cluster & 1) {
         /*
-         * Odd index. In a big-endian machine, the FAT would look something like
-         * this:
+         * Odd cluster number. In a big-endian machine, the FAT would look
+         * something like this:
          *
          *     AA AB BB CC CD DD
          *        ^
@@ -205,7 +205,7 @@ static inline uint16_t fat12_get_linked_cluster(ByteArray fat,
         return (uint16_t)byte1 << 4 | byte0 >> 4;
     } else {
         /*
-         * Even index. The FAT would look something like this:
+         * Even cluster number. The FAT would look something like this:
          *
          *     AA AB BB CC CD DD
          *              ^
