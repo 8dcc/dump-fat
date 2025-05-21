@@ -216,7 +216,7 @@ static inline uint16_t fat12_get_linked_cluster(ByteArray fat,
          *     ?? ?? ?? 23 ?1 ??
          *              ^
          */
-        return (uint16_t)byte1 << 8 | byte0;
+        return (uint16_t)(byte1 & 0x0F) << 8 | byte0;
     }
 }
 
